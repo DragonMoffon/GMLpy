@@ -35,6 +35,3 @@ def get_light_curve(
     y = (0.5 + (height - 1) * y).astype(np.int64)
 
     return source[x, y]
-
-
-_solve_polynomial((1, 1), (2, 4), (3, 7), (4, 12), (5, 6), (7, 9))
