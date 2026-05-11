@@ -101,12 +101,20 @@ class IRSDeflectionMap:
         return self._size[1]
 
     @property
+    def size(self) -> tuple[int, int]:
+        return self._size
+
+    @property
     def viewport_x(self) -> float:
         return self._viewport[0]
 
     @property
     def viewport_y(self) -> float:
         return self._viewport[1]
+
+    @property
+    def viewport(self) -> tuple[float, float]:
+        return self._viewport
 
     @property
     def system(self) -> System:
@@ -260,12 +268,20 @@ class IRSHistogram:
         return self._size[1]
 
     @property
+    def size(self) -> tuple[int, int]:
+        return self._size
+
+    @property
     def viewport_x(self) -> float:
         return self._viewport[0]
 
     @property
     def viewport_y(self) -> float:
         return self._viewport[1]
+
+    @property
+    def viewport(self) -> tuple[float, float]:
+        return self._viewport
 
     @property
     def iterations(self) -> int:
@@ -345,10 +361,12 @@ class IRSHistogram:
     def flush(self):
         self._ray_frame.clear()
 
-    def read(self, normalised: bool = False) -> np.ndarray:
+    def read(self, normalised: bool = False, flip_y: bool = False) -> np.ndarray:
         data = self._histogram.read()
         w, h = self._size
-        array = np.frombuffer(data, dtype=np.float32, count=w * h).reshape((h, w))[::-1, :]
+        array = np.frombuffer(data, dtype=np.float32, count=w * h).reshape((h, w))
+        if flip_y:
+            array = array[::-1, :]
         cap = 1.0 if not normalised else np.max(array)
         return array / cap
 
