@@ -14,6 +14,21 @@ def get_light_curve_points(
     return x, y
 
 
+def get_light_curve_indices(
+    x: npt.NDArray[np.float64],
+    y: npt.NDArray[np.float64],
+    width: int,
+    height: int,
+    domain: tuple[float, float, float, float],
+):
+    # normalise to 0.0 - 1.0
+    x = (x - domain[0]) / (domain[1] - domain[0])
+    y = (y - domain[2]) / (domain[3] - domain[2])
+
+    # expand to be indexable, the 0.5 and -1 are to account for indexing going from 0 to s-1
+    return (0.5 + (width - 1) * x).astype(np.int64), (0.5 + (height - 1) * y).astype(np.int64)
+
+
 def get_light_curve(
     source: npt.NDArray,
     steps: int,
@@ -21,17 +36,6 @@ def get_light_curve(
     end: tuple[float, float],
     domain: tuple[float, float, float, float] = (-2.0, 2.0, -2.0, 2.0),
 ) -> npt.NDArray[np.float64]:
-    # TODO: allow for more than 2 points
-
     x, y = get_light_curve_points(steps, start, end)
-    width, height = source.shape
-
-    # normalise to 0.0 - 1.0
-    x = (x - domain[0]) / (domain[1] - domain[0])
-    y = (y - domain[2]) / (domain[3] - domain[2])
-
-    # expand to be indexable, the 0.5 and -1 are to account for indexing going from 0 to s-1
-    x = (0.5 + (width - 1) * x).astype(np.int64)
-    y = (0.5 + (height - 1) * y).astype(np.int64)
-
-    return source[x, y]
+    ix, iy = get_light_curve_indices(x, y, source.shape[0], source.shape[1], domain)
+    return source[iy, ix]
