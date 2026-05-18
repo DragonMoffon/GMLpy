@@ -1,3 +1,4 @@
+import re
 from struct import pack
 from random import random
 from time import sleep, time
@@ -455,7 +456,7 @@ def create_caustic_map(histogram: IRSHistogram, source_radius: float) -> np.ndar
     source_radius = source_radius * Sr_to_au
     logger.debug("Source Radius in Astronomical Units: %s", source_radius)
     rays_per_pixel = histogram.iterations * ray_density
-    # pixel resolution is in units per pixel
+    # pixel resolution is in Au per pixel
     pixel_resolution = (
         2 * histogram.viewport_x * system.source_radius / w,
         2 * histogram.viewport_y * system.source_radius / h,
@@ -468,13 +469,12 @@ def create_caustic_map(histogram: IRSHistogram, source_radius: float) -> np.ndar
     # make convolution grid odd if histogram is odd (only true for FT based convolution)
     convolution_width = np.ceil(source_width) + 0.5  # (0.5 if w % 2 else 0.0)
     convolution_height = np.ceil(source_height) + 0.5  # (0.5 if h % 2 else 0.0)
+    kernel_x = np.arange(-int(convolution_width), int(convolution_width) + 1) * pixel_resolution[0]
+    kernel_y = (
+        np.arange(-int(convolution_height), int(convolution_height) + 1) * pixel_resolution[1]
+    )
 
-    kernel_x = np.asarray(range(int(2 * convolution_height)))
-    kernel_y = np.asarray(range(int(2 * convolution_height)))
-
-    kernel_yy, kernel_xx = np.meshgrid(kernel_y, kernel_x)
-    dx = (kernel_xx - convolution_width + 0.5) * pixel_resolution[0]
-    dy = (kernel_yy - convolution_height + 0.5) * pixel_resolution[1]
+    dy, dx = np.meshgrid(kernel_y, kernel_x)
 
     kernel = (dx**2 + dy**2 <= source_radius**2) / rays_per_pixel
 
@@ -511,6 +511,49 @@ def create_caustic_map(histogram: IRSHistogram, source_radius: float) -> np.ndar
     logger.info("finished convolution in %s seconds", time() - conv_start)
 
     return caustic
+
+
+def create_caustic_map_fourier(histogram: IRSHistogram, source_radius: float) -> np.ndarray:
+    # Compute how many rays would land at each pixel if there was no lens system
+    x_overlap = histogram.ray_count * histogram.viewport_x / histogram.deflection_map.viewport_x
+    y_overlap = histogram.ray_count * histogram.viewport_y / histogram.deflection_map.viewport_y
+    ray_overlap = x_overlap * y_overlap
+
+    w, h = histogram.width, histogram.height
+    rays_per_pixel = histogram.iterations * ray_overlap / (w * h)
+
+    # Find radius of the source object in Au
+    system = histogram.system
+    source_radius = source_radius * Sr_to_au
+    logger.debug(f"Source Radius in Astronomical Units: {source_radius}")
+
+    # Get Au half width and height of the source plane
+    source_halfwidth = histogram.viewport_x * system.source_radius
+    source_halfheight = histogram.viewport_y * system.source_radius
+
+    # Create grid of x, y Au positions in the source plane
+    grid_x = np.linspace(-source_halfwidth, source_halfwidth, w)
+    grid_y = np.linspace(-source_halfheight, source_halfheight, h)
+    grid_yy, grid_xx = np.meshgrid(grid_y, grid_x)
+
+    # Compare the (x, y) positions with the radius of the source at (0, 0)
+    # For each pixel inside the star store the inverse fraction of the rays per pixel
+    # Then take the fourier transform of the kernel
+    kernel = (grid_xx**2 + grid_yy**2 <= source_radius**2) / rays_per_pixel
+    kernel_fourier = np.fft.fftshift(np.fft.fft2(kernel))
+
+    # Fetch the histogram results and apply the fourier transform
+    result = histogram.read()
+    ray_mean = np.mean(result)
+    logger.debug(f"IRSHistogram mean ray count: {ray_mean}")
+    result_fourier = np.fft.fftshift(np.fft.fft2(result - ray_mean))
+
+    # Multiply the fourier transforms of the kernel and results together
+    # This is equivalent to the convolution of the original kernel and results
+    caustic_foutier = kernel_fourier * result_fourier
+    caustic = np.fft.ifft2(np.fft.ifftshift(caustic_foutier))
+
+    return np.fft.fftshift(caustic) + ray_mean
 
 
 class IRSCausticMap:
