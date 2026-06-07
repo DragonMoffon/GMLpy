@@ -8,7 +8,8 @@ The Packed data sent to the GPU is instead fractional based on the
 mass fraction and Einstein angle.
 """
 
-from typing import Generator, Iterable, NamedTuple, Self
+from typing import Generator, Iterator, Iterable, Self
+from dataclasses import dataclass
 from math import tan
 
 from GMLID.physics.util import calculate_einstein_angle, pc_to_au
@@ -17,13 +18,18 @@ from GMLID.logging import get_logger
 logger = get_logger("physics.system")
 
 
-class Lens(NamedTuple):
+@dataclass(frozen=True)
+class Lens:
     m: float  # In Solar Masses (M*)
     x: float  # In Astronomical Units (Au)
     y: float  # In Astronomical Units (Au)
 
+    def __iter__(self) -> Iterator[float]:
+        return iter((self.m, self.x, self.y))
 
-class System(NamedTuple):
+
+@dataclass(frozen=True)
+class System:
     # Input Values
     lens_distance: float  # In parsecs (pc)
     source_distance: float  # In parsces (pc)
