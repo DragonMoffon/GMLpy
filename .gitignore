@@ -5,5 +5,5 @@ build/
 
 test.py
 /*.png
-/gmlid.log
+/*.log
 /*.histogram
