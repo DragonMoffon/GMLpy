@@ -4,8 +4,8 @@ from tomli_w import dump as dump_toml
 from tomllib import load as load_toml
 
 from GMLID.logging import get_logger
-from GMLID.physics.numerical import IRSDeflectionMap, IRSHistogram
-from GMLID.physics.system import Lens, System
+from .numerical import IRSDeflectionMap, IRSHistogram
+from .system import Lens, System
 
 logger = get_logger("io")
 try:

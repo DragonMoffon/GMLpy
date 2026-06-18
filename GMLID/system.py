@@ -12,7 +12,7 @@ from typing import Generator, Iterator, Iterable, Self
 from dataclasses import dataclass
 from math import tan
 
-from GMLID.physics.util import calculate_einstein_angle, pc_to_au
+from GMLID.physics import calculate_einstein_angle, pc_to_au
 from GMLID.logging import get_logger
 
 logger = get_logger("physics.system")

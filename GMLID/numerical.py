@@ -1,7 +1,6 @@
-import re
 from struct import pack
 from random import random
-from time import sleep, time
+from time import sleep
 from collections.abc import Buffer
 
 from PIL import Image
@@ -10,7 +9,7 @@ from arcade import get_window, ArcadeContext
 import arcade.gl as gl
 
 from GMLID.util import get_fullscreen_geometry, get_glsl, get_symmetric_geometry
-from GMLID.physics.util import Sr_to_au
+from GMLID.physics import Sr_to_au
 from GMLID.logging import get_logger
 
 from .system import System

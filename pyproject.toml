@@ -1,15 +1,8 @@
 [project]
-name = "GMLID"
-description = "This Gravitational Microlensing Interactive Demo is part of my Honors research project at the University of Auckland"
+name = "GMLpy"
+description = "GMLpy simulates gravitational microlensing as part of my Honors research project at the University of Auckland"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 version = "2025.10.2"
 requires-python = ">= 3.13"
-dependencies = [
-  "arcade>=3.2",
-  "tomli-w",
-  "numpy"
-]
-
-
-
+dependencies = ["arcade>=3.2", "tomli-w", "numpy"]
