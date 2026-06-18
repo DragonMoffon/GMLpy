@@ -6,7 +6,7 @@ from arcade import ArcadeContext
 import arcade.gl as gl
 import numpy as np
 
-import GMLID.glsl as glsl_module
+import GML.glsl as glsl_module
 
 
 def get_glsl(name: str) -> Path:

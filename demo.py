@@ -1,16 +1,16 @@
 import random
 import math
 import arcade
-import GMLID
+import GML
 
-point_mass_system = GMLID.System.create(4000.0, 8000.0, GMLID.Lens(1.0, 0.0, 0.0))
-microlensing_system = GMLID.System.create(
+point_mass_system = GML.System.create(4000.0, 8000.0, GML.Lens(1.0, 0.0, 0.0))
+microlensing_system = GML.System.create(
     4000.0,
     8000.0,
     (
-        GMLID.Lens(0.05, 0.0, 0.0),
+        GML.Lens(0.05, 0.0, 0.0),
         *(
-            GMLID.Lens(
+            GML.Lens(
                 0.05,
                 math.cos(i / 15.0 * math.pi) * random.random() * point_mass_system.lens_radius,
                 math.sin(i / 15.0 * math.pi) * random.random() * point_mass_system.lens_radius,
@@ -27,13 +27,13 @@ lens_scaling = 180.0 / point_mass_system.lens_radius
 class Window(arcade.Window):
     def __init__(self):
         super().__init__(720, 720)
-        self.deflection = GMLID.IRSDeflectionMap(system, (1080, 1080))
+        self.deflection = GML.IRSDeflectionMap(system, (1080, 1080))
         self.deflection.generate()
 
-        self.geometry = GMLID.util.get_position_symmetric_geometry(self.ctx, 3.0, 3.0)
+        self.geometry = GML.util.get_position_symmetric_geometry(self.ctx, 3.0, 3.0)
         self.program = self.ctx.load_program(
-            vertex_shader=GMLID.util.get_glsl("UTIL_unprojected_uv_vs"),
-            fragment_shader=GMLID.util.get_glsl("IRS_image_fs"),
+            vertex_shader=GML.util.get_glsl("UTIL_unprojected_uv_vs"),
+            fragment_shader=GML.util.get_glsl("IRS_image_fs"),
         )
         self.program["source"] = 0.0, 0.0, 0.05, 0.0
 

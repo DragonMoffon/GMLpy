@@ -8,9 +8,9 @@ import numpy as np
 from arcade import get_window, ArcadeContext
 import arcade.gl as gl
 
-from GMLID.util import get_fullscreen_geometry, get_glsl, get_symmetric_geometry
-from GMLID.physics import Sr_to_au
-from GMLID.logging import get_logger
+from GML.util import get_fullscreen_geometry, get_glsl, get_symmetric_geometry
+from GML.physics import Sr_to_au
+from GML.logging import get_logger
 
 from .system import System
 

@@ -12,8 +12,8 @@ from typing import Generator, Iterator, Iterable, Self
 from dataclasses import dataclass
 from math import tan
 
-from GMLID.physics import calculate_einstein_angle, pc_to_au
-from GMLID.logging import get_logger
+from GML.physics import calculate_einstein_angle, pc_to_au
+from GML.logging import get_logger
 
 logger = get_logger("physics.system")
 
@@ -84,7 +84,7 @@ class System:
         com_x /= mass
         com_y /= mass
 
-        # * Calculation of the Einstein angle is differed to GMLID.util as it optimises
+        # * Calculation of the Einstein angle is differed to GML.util as it optimises
         # * for floating point imprecision.
         einstein_angle = calculate_einstein_angle(mass, lens_distance, source_distance)
         lens_radius = pc_to_au * (lens_distance * tan(einstein_angle))

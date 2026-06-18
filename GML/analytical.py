@@ -1,6 +1,6 @@
 import numpy as np
 
-from GMLID.logging import get_logger
+from GML.logging import get_logger
 
 from .system import System
 
@@ -21,10 +21,10 @@ def get_amplification_at_position(system: System, locations: np.ndarray) -> np.n
     elif count == 2:
         return two_lens_amplification(system, locations)
     logger.error(
-        f"No analytical amplification for a {count} lens system. Use GMLID.physics.numerical instead"
+        f"No analytical amplification for a {count} lens system. Use GML.physics.numerical instead"
     )
     raise ValueError(
-        f"No analytical amplification for a {count} lens system. Use GMLID.physics.numerical instead"
+        f"No analytical amplification for a {count} lens system. Use GML.physics.numerical instead"
     )
 
 
@@ -65,10 +65,10 @@ def get_critical_curves(system: System, count: int) -> np.ndarray:
     elif lens_count == 2:
         return two_lens_critical_curves(system, count)
     logger.error(
-        f"No analytical solutions for a {lens_count} lens system. Use GMLID.physics.numerical instead"
+        f"No analytical solutions for a {lens_count} lens system. Use GML.physics.numerical instead"
     )
     raise ValueError(
-        f"No analytical solutions for a {lens_count} lens system. Use GMLID.physics.numerical instead"
+        f"No analytical solutions for a {lens_count} lens system. Use GML.physics.numerical instead"
     )
 
 

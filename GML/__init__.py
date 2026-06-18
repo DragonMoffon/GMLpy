@@ -1,7 +1,7 @@
-from GMLID.logging import setup_logging, get_logger
-from GMLID.setup import setup_GMLID
-import GMLID.io as io
-from GMLID.io import dump_histogram, load_histogram, dump_system, load_system
+from GML.logging import setup_logging, get_logger
+from GML.setup import setup_GMLpy
+import GML.io as io
+from GML.io import dump_histogram, load_histogram, dump_system, load_system
 from .physics import (
     LIGHT_SPEED_m,
     LIGHT_SPEED_km,
@@ -29,7 +29,7 @@ from .numerical import IRSDeflectionMap, IRSHistogram, IRSCriticalMap
 __all__ = (
     "setup_logging",
     "get_logger",
-    "setup_GMLID",
+    "setup_GMLpy",
     "LIGHT_SPEED_m",
     "LIGHT_SPEED_km",
     "LIGHT_SPEED_au",

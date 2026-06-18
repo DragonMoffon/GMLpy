@@ -3,7 +3,7 @@ from pathlib import Path
 from tomli_w import dump as dump_toml
 from tomllib import load as load_toml
 
-from GMLID.logging import get_logger
+from GML.logging import get_logger
 from .numerical import IRSDeflectionMap, IRSHistogram
 from .system import Lens, System
 

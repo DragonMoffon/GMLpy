@@ -4,9 +4,9 @@ from time import time
 from arcade import Window
 import numpy as np
 
-from GMLID.physics import System, Lens, IRSDeflectionMap, IRSHistogram
-from GMLID.io import _dump_histogram_raw
-from GMLID.logging import get_logger
+from GML import System, Lens, IRSDeflectionMap, IRSHistogram
+from GML.io import _dump_histogram_raw
+from GML.logging import get_logger
 
 logger = get_logger("generation")
 try:

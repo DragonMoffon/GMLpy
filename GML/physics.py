@@ -1,4 +1,4 @@
-from GMLID.logging import get_logger
+from GML.logging import get_logger
 
 logger = get_logger("physics.util")
 

@@ -4,7 +4,7 @@ import argparse
 
 def parse_args(args: Sequence[str] | None = None):
     parser = argparse.ArgumentParser(
-        "GMLID",
+        "GML",
         "Gravitational Lensing Interactive Demo for thin-lens simulations",
         allow_abbrev=True,
     )

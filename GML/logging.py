@@ -55,7 +55,7 @@ def setup_logging(
         )
 
     # Create parent logger and set level to DEBUG
-    logger = logging.getLogger("GMLID")
+    logger = logging.getLogger("GMLpy")
     logger.setLevel(logging.DEBUG)
     logger.addHandler(queue_handler)
 
@@ -72,7 +72,7 @@ def setup_logging(
 
 def get_logger(name: str):
     """
-    Get a logging.Logger and setup GMLID logger with automatic name attachment
+    Get a logging.Logger and setup GML logger with automatic name attachment
     """
     setup_logging()
-    return logging.getLogger(f"GMLID.{name}")
+    return logging.getLogger(f"GMLpy.{name}")
