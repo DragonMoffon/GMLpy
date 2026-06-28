@@ -19,8 +19,8 @@ layout(std430) readonly buffer lensBlock {
 vec2 find_deflection(vec2 ray, vec2 lens, float radius_sqr){
   vec2 relative = ray - lens;
   // we don't need the sqrt because we need to normalise relative and also divide by separation which is sqrt * sqrt.
-  float separation = dot(relative, relative);
-  return radius_sqr * relative / separation;
+  float separation_sqr = dot(relative, relative);
+  return radius_sqr * relative / separation_sqr;
 }
 
 in vec2 vs_uv; // (x, y) location in lens place

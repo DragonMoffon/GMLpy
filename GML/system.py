@@ -112,6 +112,6 @@ class System:
 
         for lens in self.lenses:
             yield lens.m  # The mass is unneccisary, but due to byte alignment it is still reserved
-            yield (lens.m / M)
-            yield (lens.x - c_x) / Rl
-            yield (lens.y - c_y) / Rl
+            yield (lens.m / M)  # mass fraction
+            yield (lens.x - c_x) / Rl  # small angle approximation einstein angle
+            yield (lens.y - c_y) / Rl  # small angle approximation einstein angle
