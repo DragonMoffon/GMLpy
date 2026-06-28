@@ -23,7 +23,7 @@ from .analytical import (
     get_critical_curves,
     apply_lens_equation,
 )
-from .numerical import IRSDeflectionMap, IRSHistogram, IRSCriticalMap
+from .numerical import IRSDeflectionMap, IRSHistogram, create_magnification_map
 
 
 __all__ = (
@@ -50,7 +50,7 @@ __all__ = (
     "apply_lens_equation",
     "IRSDeflectionMap",
     "IRSHistogram",
-    "IRSCriticalMap",
+    "create_magnification_map",
     "io",
     "dump_histogram",
     "load_histogram",

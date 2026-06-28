@@ -9,7 +9,6 @@ from arcade import get_window, ArcadeContext
 import arcade.gl as gl
 
 from GML.util import get_fullscreen_geometry, get_glsl, get_symmetric_geometry
-from GML.physics import Sr_to_au
 from GML.logging import get_logger
 
 from .system import System
@@ -447,7 +446,7 @@ def compute_pixel_resolution(
     return einstein_radius * 2 * viewport[0] / size[0], einstein_radius * 2 * viewport[1] / size[1]
 
 
-def create_magnifcation_map(histogram: IRSHistogram, source_radius: float) -> np.ndarray:
+def create_magnification_map(histogram: IRSHistogram, source_radius: float) -> np.ndarray:
     # Compute how many rays would land at each pixel if there was no lens system
     x_overlap = histogram.ray_count * histogram.viewport_x / histogram.deflection_map.viewport_x
     y_overlap = histogram.ray_count * histogram.viewport_y / histogram.deflection_map.viewport_y
