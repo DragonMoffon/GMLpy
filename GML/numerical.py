@@ -447,7 +447,7 @@ def compute_pixel_resolution(
     return einstein_radius * 2 * viewport[0] / size[0], einstein_radius * 2 * viewport[1] / size[1]
 
 
-def create_caustic_map(histogram: IRSHistogram, source_radius: float) -> np.ndarray:
+def create_magnifcation_map(histogram: IRSHistogram, source_radius: float) -> np.ndarray:
     # Compute how many rays would land at each pixel if there was no lens system
     x_overlap = histogram.ray_count * histogram.viewport_x / histogram.deflection_map.viewport_x
     y_overlap = histogram.ray_count * histogram.viewport_y / histogram.deflection_map.viewport_y
@@ -478,10 +478,10 @@ def create_caustic_map(histogram: IRSHistogram, source_radius: float) -> np.ndar
 
     # Multiply the fourier transforms of the kernel and results together
     # This is equivalent to the convolution of the original kernel and results
-    caustic_foutier = kernel_fourier * result_fourier
-    caustic = np.fft.ifft2(np.fft.ifftshift(caustic_foutier))
+    magnifcation_fourier = kernel_fourier * result_fourier
+    magnifcation = np.fft.ifft2(np.fft.ifftshift(magnifcation_fourier))
 
     # The input histogram and final caustic are purely real.
     # The complex part are tiny (e-13 to e-15), and `abs` ensures
     # dtype is float not complex
-    return abs(np.fft.fftshift(caustic) + ray_mean)
+    return abs(np.fft.fftshift(magnifcation) + ray_mean)
