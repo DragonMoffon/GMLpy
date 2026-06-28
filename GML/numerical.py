@@ -441,6 +441,12 @@ class IRSCriticalMap:
         return Image.fromarray((self.read() * 255.0).astype(np.uint8), "L").convert("RGB")
 
 
+def compute_pixel_resolution(
+    einstein_radius: float, viewport: tuple[float, float], size: tuple[int, int]
+) -> tuple[float, float]:
+    return einstein_radius * 2 * viewport[0] / size[0], einstein_radius * 2 * viewport[1] / size[1]
+
+
 def create_caustic_map(histogram: IRSHistogram, source_radius: float) -> np.ndarray:
     # Compute how many rays would land at each pixel if there was no lens system
     x_overlap = histogram.ray_count * histogram.viewport_x / histogram.deflection_map.viewport_x
@@ -450,19 +456,13 @@ def create_caustic_map(histogram: IRSHistogram, source_radius: float) -> np.ndar
     w, h = histogram.width, histogram.height
     rays_per_pixel = histogram.iterations * ray_overlap / (w * h)
 
-    # Find radius of the source object in Au
-    system = histogram.system
-    source_radius = source_radius * Sr_to_au
-    logger.debug(f"Source Radius in Astronomical Units: {source_radius}")
+    # Create pixel grid.
+    halfwidth = w / 2
+    halfheight = h / 2
 
-    # Get Au half width and height of the source plane
-    source_halfwidth = histogram.viewport_x * system.source_radius
-    source_halfheight = histogram.viewport_y * system.source_radius
-
-    # Create grid of x, y Au positions in the source plane
-    grid_x = np.linspace(-source_halfwidth, source_halfwidth, w)
-    grid_y = np.linspace(-source_halfheight, source_halfheight, h)
-    grid_yy, grid_xx = np.meshgrid(grid_y, grid_x)
+    grid_x = np.linspace(0.5 - halfwidth, halfwidth - 0.5, w)
+    grid_y = np.linspace(0.5 - halfheight, halfheight - 0.5, h)
+    grid_yy, grid_xx = np.meshgrid(grid_y, grid_x)  # data from GPU is stored in [y, x] order
 
     # Compare the (x, y) positions with the radius of the source at (0, 0)
     # For each pixel inside the star store the inverse fraction of the rays per pixel
@@ -482,6 +482,6 @@ def create_caustic_map(histogram: IRSHistogram, source_radius: float) -> np.ndar
     caustic = np.fft.ifft2(np.fft.ifftshift(caustic_foutier))
 
     # The input histogram and final caustic are purely real.
-    # The complex part are tiny e-13 -> e-15, and `abs` ensures
+    # The complex part are tiny (e-13 to e-15), and `abs` ensures
     # dtype is float not complex
     return abs(np.fft.fftshift(caustic) + ray_mean)
