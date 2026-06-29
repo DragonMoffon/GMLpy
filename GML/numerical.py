@@ -350,12 +350,12 @@ class IRSHistogram:
                 elif self._delay:
                     sleep(self._delay)
                 self._iterations += 1
-                # logger.debug(
-                #     f"IRSHistogram generation step {i + 1} ({100 * (i + 1) / iterations:.1f}%) [Total Iterations = {self._iterations}]"
-                # )
+                logger.debug(
+                    f"IRSHistogram generation step {i + 1} ({100 * (i + 1) / iterations:.1f}%) [Total Iterations = {self._iterations}]"
+                )
 
         self._ctx.disable(gl.BLEND)
-        # logger.debug(f"IRSHistogram finished generation. [Total Iterations = {self._iterations}]")
+        logger.debug(f"IRSHistogram finished generation. [Total Iterations = {self._iterations}]")
 
     def flush(self):
         self._ray_frame.clear()
