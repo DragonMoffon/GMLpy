@@ -350,12 +350,12 @@ class IRSHistogram:
                 elif self._delay:
                     sleep(self._delay)
                 self._iterations += 1
-                logger.debug(
-                    f"IRSHistogram generation step {i + 1} ({100 * (i + 1) / iterations:.1f}%) [Total Iterations = {self._iterations}]"
-                )
+                # logger.debug(
+                #     f"IRSHistogram generation step {i + 1} ({100 * (i + 1) / iterations:.1f}%) [Total Iterations = {self._iterations}]"
+                # )
 
         self._ctx.disable(gl.BLEND)
-        logger.debug(f"IRSHistogram finished generation. [Total Iterations = {self._iterations}]")
+        # logger.debug(f"IRSHistogram finished generation. [Total Iterations = {self._iterations}]")
 
     def flush(self):
         self._ray_frame.clear()
@@ -484,3 +484,8 @@ def create_magnification_map(histogram: IRSHistogram, source_radius: float) -> n
     # The complex part are tiny (e-13 to e-15), and `abs` ensures
     # dtype is float not complex
     return abs(np.fft.fftshift(magnifcation) + ray_mean)
+
+def capture_magnification_map(histogram: IRSHistogram, source_radius: float) -> Image.Image:
+    magnification = create_magnification_map(histogram, source_radius)
+    m = 255.0 * np.max(magnification)
+    return Image.fromarray((magnification * m).astype(np.uint8), "L").convert("RGB")
