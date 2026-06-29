@@ -24,6 +24,7 @@ from .analytical import (
     apply_lens_equation,
 )
 from .numerical import IRSDeflectionMap, IRSHistogram, create_magnification_map
+from .lightcurve import get_light_curve
 
 
 __all__ = (
@@ -51,6 +52,7 @@ __all__ = (
     "IRSDeflectionMap",
     "IRSHistogram",
     "create_magnification_map",
+    "get_light_curve",
     "io",
     "dump_histogram",
     "load_histogram",
