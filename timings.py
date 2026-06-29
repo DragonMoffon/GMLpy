@@ -1,10 +1,11 @@
+import random
+import sys
+
 import matplotlib.pyplot as plt
-from matplotlib import colormaps
 import numpy as np
 
 import GML
-
-magma = colormaps["magma"]
+from GML import system
 
 win = GML.setup_GMLpy()
 
@@ -356,12 +357,132 @@ def generate_results_magnifcation():
 
 
 def analytic_histograms():
-    pass
+    m1 = 0.25
+    m2 = 1 - m1
+    phi = -2.726446336477429
+    system = GML.System.create(
+        4000.0,
+        8000.0,
+        (GML.Lens(m1, 0.0, 0.0), GML.Lens(m2, 4.2 * np.cos(phi), 4.2 * np.sin(phi))),
+    )
+    packed = tuple(system.pack_lenses())
+
+    deflection = GML.IRSDeflectionMap(system, (6144, 6144))
+    deflection.generate()
+    histogram = GML.IRSHistogram(6144, (4096, 4096), deflection)
+    histogram.generate(250)
+    result = histogram.read(normalised=True)
+
+    analytical = GML.get_critical_curves(system, 200)
+    caustic = GML.apply_lens_equation(system, analytical)
+
+    fig = plt.figure(figsize=(8, 12))
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax2, ax3, ax4, ax5 = (
+        fig.add_subplot(4, 2, 5),
+        fig.add_subplot(4, 2, 6),
+        fig.add_subplot(4, 2, 7),
+        fig.add_subplot(4, 2, 8),
+    )
+
+    ext = (-2.0, 2.0, -2.0, 2.0)
+
+    ax1.imshow(result, extent=ext, aspect="equal", origin="lower")
+    ax1.scatter((packed[2], packed[6]), (packed[3], packed[7]), marker="x", c="gray")
+    ax1.scatter(analytical[:, 0], analytical[:, 1], s=0.4, c="C0")
+    ax1.scatter(caustic[:, 0], caustic[:, 1], s=0.4, c="C1")
+    ax1.set_xlabel(r"x-axis [$\theta_E$]")
+    ax1.set_ylabel(r"y-axis [$\theta_E$]")
+
+    ax2.imshow(result, extent=ext, aspect="equal", origin="lower")
+    ax2.scatter(caustic[:, 0], caustic[:, 1], s=0.4, c="C1")
+    ax2.set_xlim(-0.25, -0.1)
+    ax2.set_ylim(-0.15, 0.0)
+
+    ax3.imshow(result, extent=ext, aspect="equal", origin="lower")
+    ax3.scatter(caustic[:, 0], caustic[:, 1], s=0.4, c="C1")
+    ax3.set_xlim(-0.08, -0.02)
+    ax3.set_ylim(-0.52, -0.58)
+
+    ax4.imshow(result, extent=ext, aspect="equal", origin="lower")
+    ax4.scatter(caustic[:, 0], caustic[:, 1], s=0.4, c="C1")
+    ax4.set_xlim(0.3, 0.5)
+    ax4.set_ylim(0.05, 0.25)
+
+    ax5.imshow(result, extent=ext, aspect="equal", origin="lower")
+    ax5.scatter(caustic[:, 0], caustic[:, 1], s=0.4, c="C1")
+    ax5.set_xlim(-0.5, 0.0)
+    ax5.set_ylim(0.2, 0.7)
+
+    fig.tight_layout()
+    fig.savefig("Results_Histogram_Analytic_Comparison.png", transparent=True)
+    # plt.show()
+
+
+# analytic_histograms()
 
 
 def analytic_lightcurves():
-    pass
+    system = GML.System.create(4000, 8000, (GML.Lens(1.0, 0.0, 0.0)))
 
+    deflection = GML.IRSDeflectionMap(system, (6144, 6144))
+    deflection.generate()
+    histogram = GML.IRSHistogram(6144, (4096, 4096), deflection)
+    histogram.generate(250)
+    result = histogram.read()
+
+    t = np.linspace(0.0, 1.0, 100)
+
+    curve = np.zeros((100, 2))
+    curve[:, 0], curve[:, 1] = GML.lightcurve.get_light_curve_points(100, (-0.5, 0.5), (0.5, 0.5))
+    analytic_1 = GML.get_amplification_at_position(system, curve)
+    curve[:, 0], curve[:, 1] = GML.lightcurve.get_light_curve_points(100, (-0.5, 0.4), (0.5, 0.4))
+    analytic_2 = GML.get_amplification_at_position(system, curve)
+    curve[:, 0], curve[:, 1] = GML.lightcurve.get_light_curve_points(100, (-0.5, 0.3), (0.5, 0.3))
+    analytic_3 = GML.get_amplification_at_position(system, curve)
+    curve[:, 0], curve[:, 1] = GML.lightcurve.get_light_curve_points(100, (-0.5, 0.2), (0.5, 0.2))
+    analytic_4 = GML.get_amplification_at_position(system, curve)
+    curve[:, 0], curve[:, 1] = GML.lightcurve.get_light_curve_points(100, (-0.5, 0.1), (0.5, 0.1))
+    analytic_5 = GML.get_amplification_at_position(system, curve)
+
+    numerical_1 = GML.lightcurve.get_light_curve(result, 100, (-0.5, 0.5), (0.5, 0.5))
+    numerical_2 = GML.lightcurve.get_light_curve(result,100, (-0.5, 0.4), (0.5, 0.4))
+    numerical_3 = GML.lightcurve.get_light_curve(result,100, (-0.5, 0.3), (0.5, 0.3))
+    numerical_4 = GML.lightcurve.get_light_curve(result,100, (-0.5, 0.2), (0.5, 0.2))
+    numerical_5 = GML.lightcurve.get_light_curve(result,100, (-0.5, 0.1), (0.5, 0.1))
+
+    fig = plt.figure(figsize=(8, 12))
+
+    ax1, ax2 = fig.subplots(2, 1)
+
+    ax1.imshow(result, extent=(-2, 2, -2, 2), origin="lower", aspect="equal")
+    ax1.hlines((0.5, 0.4, 0.3, 0.2, 0.1), -0.5, 0.5, ("C0", "C1", "C2", "C3", "C4"))
+    ax1.set_xlim(-0.5, 0.5)
+    ax1.set_ylim(-0.1, 0.7)
+    ax1.set_xlabel(r"x-axis [$\theta_E$]")
+    ax1.set_ylabel(r"y-axis [$\theta_E$]")
+
+
+    ax2.plot(t, numerical_1, "C0")
+    ax2.plot(t, numerical_2, "C1")
+    ax2.plot(t, numerical_3, "C2")
+    ax2.plot(t, numerical_4, "C3")
+    ax2.plot(t, numerical_5, "C4")
+    ax2.set_ylabel("$N_{r a y s}$")
+
+    ax3 = ax2.twinx()
+    ax3.plot(t, analytic_1, "--C0")
+    ax3.plot(t, analytic_2, "--C1")
+    ax3.plot(t, analytic_3, "--C2")
+    ax3.plot(t, analytic_4, "--C3")
+    ax3.plot(t, analytic_5, "--C4")
+    ax3.set_ylabel(r"magnification $\mu$")
+
+    fig.tight_layout()
+    plt.show()
+
+
+# analytic_lightcurves()
 
 def generate_light_curves():
     pass
@@ -433,25 +554,25 @@ def plot_deflection_timing():
     fig = plt.figure(figsize=(8, 8))
     ax = fig.subplots(1, 1)
 
-    ax.semilogx(sizes, timings[0], "-o", label="1 Lens")
-    ax.semilogx(sizes, timings[1], "-o", label="2 Lenses")
-    ax.semilogx(sizes, timings[2], "-o", label="3 Lenses")
-    ax.semilogx(sizes, timings[3], "-o", label="4 Lenses")
-    ax.semilogx(sizes, timings[4], "-o", label="5 Lenses")
-    ax.semilogx(sizes, timings[5], "-o", label="6 Lenses")
-    ax.semilogx(sizes, timings[6], "-o", label="7 Lenses")
-    ax.semilogx(sizes, timings[7], "-o", label="8 Lenses")
-    ax.semilogx(sizes, timings[8], "-o", label="9 Lenses")
-    ax.semilogx(sizes, timings[9], "-o", label="10 Lenses")
-    ax.set_xticks(sizes, [f"${v}^2$" for v in sizes])
+    ax.semilogx(sizes**2, timings[0], "-o", label="1 Lens")
+    ax.semilogx(sizes**2, timings[1], "-o", label="2 Lenses")
+    ax.semilogx(sizes**2, timings[2], "-o", label="3 Lenses")
+    ax.semilogx(sizes**2, timings[3], "-o", label="4 Lenses")
+    ax.semilogx(sizes**2, timings[4], "-o", label="5 Lenses")
+    ax.semilogx(sizes**2, timings[5], "-o", label="6 Lenses")
+    ax.semilogx(sizes**2, timings[6], "-o", label="7 Lenses")
+    ax.semilogx(sizes**2, timings[7], "-o", label="8 Lenses")
+    ax.semilogx(sizes**2, timings[8], "-o", label="9 Lenses")
+    ax.semilogx(sizes**2, timings[9], "-o", label="10 Lenses")
+    ax.set_xticks(sizes**2, [f"${v}^2$" for v in sizes])
     ax.set_xlabel("$N_{px}$")
     ax.set_ylabel("Mean generation time [ms]")
     ax.legend()
-    ax.grid(which="both")
+    ax.grid(which="major")
     plt.show()
 
 
-# plot_deflection_timing()
+plot_deflection_timing()
 
 
 def time_histogram():
