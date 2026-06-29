@@ -1,8 +1,3 @@
-from os import system
-from struct import pack
-import sys
-from timeit import timeit
-
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
 import numpy as np
@@ -404,6 +399,7 @@ def time_deflection_maps():
             count = j + 1
             total = timeit.timeit(gen_deflection_map, number=10000)
             timings[j, i] = total / 10
+            win.ctx.gc()
         print()
 
     print(timings)
@@ -473,23 +469,18 @@ def time_histogram():
         for _ in range(100)
     )
 
-    histogram: GML.IRSHistogram
-    count = 0
-
     def gen_histogram():
+        displacement.update_system(GML.System.create(4000, 8000, random.sample(lenses, j + 1)))
+        displacement.generate()
         histogram.generate(count, flush=True)
 
-    rays = np.asarray((1024, 2048, 4096, 8192, 16384))
-    iterations = np.asarray((1, 5, 10, 50, 100, 250, 1000))
+    iterations = np.asarray((1, 10, 100, 1000, 10000))
     timings_Nrays = np.zeros((10, 5))
     timings_iterations = np.zeros((10, 5))
 
     displacement = GML.IRSDeflectionMap(GML.System.create(4000, 8000, ()), (3072, 3072))
 
     for j in range(10):
-        system = GML.System.create(4000, 8000, random.sample(lenses, j + 1))
-        displacement.update_system(system)
-        displacement.generate()
         print(f"{j + 1} lenses:")
         for i, number in enumerate(rays):
             histogram = GML.IRSHistogram(number, (2048, 2048), displacement)
@@ -498,12 +489,102 @@ def time_histogram():
             timings_Nrays[j, i] = total
             print(f"{number} rays: {total}s")
             win.ctx.gc()
+        for i, number in enumerate(iterations):
+            displacement.update_system(GML.System.create(4000, 8000, random.sample(lenses, j + 1)))
+            displacement.generate()
+            histogram = GML.IRSHistogram(3072, (2048, 2048), displacement)
+            count = number
+            total = timeit.timeit(gen_histogram, number=1)
+            timings_iterations[j, i] = total
+            print(f"{number} iterations: {total}s")
+            win.ctx.gc()
 
     print(timings_Nrays)
+    print(timings_iterations)
 
 
 time_histogram()
 
 
-def plot_histogram_timing():
-    pass
+def plot_histogram_ray_timing():
+    # fmt: off
+    timings = np.asarray([
+        [ 0.0808791,  0.1812967,  0.5569056,  2.8286629, 19.5751064,],
+        [ 0.1616886,  0.1678776,  0.5718008,  2.9215918, 18.3287129,],
+        [ 0.1739917,  0.1721568,  0.5701968,  2.8568601, 20.8490656,],
+        [ 0.1618895,  0.1653092,  0.5479115,  2.8923711, 20.6899797,],
+        [ 0.1343681,  0.1625216,  0.5582816,  2.8465172, 20.5781882,],
+        [ 0.1531289,  0.1647358,  0.5568925,  2.862128 , 19.1635897,],
+        [ 0.1634785,  0.169102 ,  0.5586047,  2.8695588, 19.1869598,],
+        [ 0.1363479,  0.165658 ,  0.5629076,  2.8897342, 19.8834876,],
+        [ 0.1582954,  0.1645702,  0.5633639,  2.9089898, 19.9871393,],
+        [ 0.1659803,  0.1629728,  0.5563749,  2.8370353, 18.4359425,],
+    ])
+    # fmt: on
+
+    rays = np.asarray((1024, 2048, 4096, 8192, 16384))
+
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.subplots(1, 1)
+
+    ax.semilogx(rays, timings[0], "-o", label="1 Lens")
+    ax.semilogx(rays, timings[1], "-o", label="2 Lenses")
+    ax.semilogx(rays, timings[2], "-o", label="3 Lenses")
+    ax.semilogx(rays, timings[3], "-o", label="4 Lenses")
+    ax.semilogx(rays, timings[4], "-o", label="5 Lenses")
+    ax.semilogx(rays, timings[5], "-o", label="6 Lenses")
+    ax.semilogx(rays, timings[6], "-o", label="7 Lenses")
+    ax.semilogx(rays, timings[7], "-o", label="8 Lenses")
+    ax.semilogx(rays, timings[8], "-o", label="9 Lenses")
+    ax.semilogx(rays, timings[9], "-o", label="10 Lenses")
+    ax.set_xticks(rays, [f"${v}^2$" for v in rays])
+    ax.set_xlabel("$N_{r a y}$")
+    ax.set_ylabel("Mean generation time [s]")
+    ax.legend()
+    ax.grid(which="major")
+    plt.show()
+
+
+# plot_histogram_ray_timing()
+
+
+def plot_histogram_iteration_timing():
+    # fmt: off
+    timings = np.asarray([
+        [ 0.0808791,  0.1812967,  0.5569056,  2.8286629, 19.5751064,],
+        [ 0.1616886,  0.1678776,  0.5718008,  2.9215918, 18.3287129,],
+        [ 0.1739917,  0.1721568,  0.5701968,  2.8568601, 20.8490656,],
+        [ 0.1618895,  0.1653092,  0.5479115,  2.8923711, 20.6899797,],
+        [ 0.1343681,  0.1625216,  0.5582816,  2.8465172, 20.5781882,],
+        [ 0.1531289,  0.1647358,  0.5568925,  2.862128 , 19.1635897,],
+        [ 0.1634785,  0.169102 ,  0.5586047,  2.8695588, 19.1869598,],
+        [ 0.1363479,  0.165658 ,  0.5629076,  2.8897342, 19.8834876,],
+        [ 0.1582954,  0.1645702,  0.5633639,  2.9089898, 19.9871393,],
+        [ 0.1659803,  0.1629728,  0.5563749,  2.8370353, 18.4359425,],
+    ])
+    # fmt: on
+
+    iterations = np.asarray((1, 10, 100, 1000, 10000))
+
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.subplots(1, 1)
+
+    ax.semilogx(iterations, timings[0], "-o", label="1 Lens")
+    ax.semilogx(iterations, timings[1], "-o", label="2 Lenses")
+    ax.semilogx(iterations, timings[2], "-o", label="3 Lenses")
+    ax.semilogx(iterations, timings[3], "-o", label="4 Lenses")
+    ax.semilogx(iterations, timings[4], "-o", label="5 Lenses")
+    ax.semilogx(iterations, timings[5], "-o", label="6 Lenses")
+    ax.semilogx(iterations, timings[6], "-o", label="7 Lenses")
+    ax.semilogx(iterations, timings[7], "-o", label="8 Lenses")
+    ax.semilogx(iterations, timings[8], "-o", label="9 Lenses")
+    ax.semilogx(iterations, timings[9], "-o", label="10 Lenses")
+    ax.set_xticks(iterations)
+    ax.set_xlabel(r"$N_{iterations}$")
+    ax.set_ylabel("Mean generation time [s]")
+    ax.legend()
+    ax.grid(which="major")
+    plt.show()
+
+
+# plot_histogram_iteration_timing()
